@@ -1,0 +1,38 @@
+import requests
+import time
+
+
+url = "https://www.bikepointsc.com.br/bicicletas/mountain-bike/c/40424"
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+
+
+last_status = None
+last_change = time.time()
+
+
+def get_status(url):
+    headers = {
+        'Pragma': 'azion-debug-cache',
+        'User-Agent': user_agent
+    }
+    response = requests.head(url, headers=headers)
+    cache_status = response.headers.get('X-Cache', 'No X-Cache header found')
+    http_status = response.status_code
+    return cache_status, http_status
+
+
+while True:
+    # Get the current cache status and HTTP status
+    current_cache_status, current_http_status = get_status(url)
+    if last_status is not None and current_cache_status != last_status:
+        now = time.time()
+        duration = now - last_change
+        print(f"Cache status changed from {last_status} to {current_cache_status} after {duration:.2f} seconds.")
+        last_change = now
+
+    last_status = current_cache_status
+
+    print(f"Current cache status: {current_cache_status}, HTTP status: {current_http_status}")
+
+
+    time.sleep(5)
